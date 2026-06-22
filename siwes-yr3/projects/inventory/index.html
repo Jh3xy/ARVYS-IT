@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Inventory Management System</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <link rel="stylesheet" href="./style.css">
+  <script src="./script.js" defer></script>
+</head>
+<body>
+  <div class="container">
+
+    <div class="header">
+      <h1>Inventory Management</h1>
+      <p>Track, search, and manage your store products.</p>
+    </div>
+
+    <!-- Stats -->
+    <div class="stats-row">
+      <div class="stat-card accent">
+        <div class="s-label">Total Value</div>
+        <div class="s-value" id="stat-value">₦0</div>
+        <div class="s-sub">Across all stock</div>
+      </div>
+      <div class="stat-card">
+        <div class="s-label">Total Products</div>
+        <div class="s-value" id="stat-products">0</div>
+        <div class="s-sub">Unique items</div>
+      </div>
+      <div class="stat-card">
+        <div class="s-label">Total Items</div>
+        <div class="s-value" id="stat-items">0</div>
+        <div class="s-sub">Combined quantity</div>
+      </div>
+    </div>
+
+    <!-- Form -->
+    <div class="form-card">
+      <h2>Add Product</h2>
+      <div class="form-row">
+        <div class="form-group" >
+          <label for="inp-name">Product Name</label>
+          <input type="text" id="inp-name" placeholder="e.g. Wireless Headphones" />
+        </div>
+        <div class="form-group">
+          <label for="inp-cat">Category</label>
+          <div class="select-wrap">
+            <select id="inp-cat">
+              <option value="Electronics">Electronics</option>
+              <option value="Food">Food</option>
+              <option value="Clothing">Clothing</option>
+              <option value="Furniture">Furniture</option>
+              <option value="Stationery">Stationery</option>
+              <option value="Other">Other</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-group" >
+          <label for="inp-price">Price (₦)</label>
+          <div class="price-wrap">
+            <span class="price-prefix">₦</span>
+            <input type="number" id="inp-price" placeholder="0.00" min="0" />
+          </div>
+        </div>
+        <div class="form-group">
+          <label for="inp-qty">Quantity</label>
+          <input type="number" id="inp-qty" placeholder="0" min="0" />
+        </div>
+        <button class="btn-add-product" id="btn-add">
+          <i data-lucide="plus"></i> Add Product
+        </button>
+      </div>
+      <div class="err-msg" id="err-msg">Please fill in all fields with valid values.</div>
+    </div>
+
+    <!-- Table -->
+    <div class="table-card">
+      <div class="table-top">
+        <h2>Products</h2>
+        <div class="table-controls">
+          <div class="search-wrap">
+            <span class="search-ico"><i data-lucide="search"></i></span>
+            <input class="search-inp" id="search-inp" type="text" placeholder="Search by name or category…" />
+          </div>
+          <span class="count-pill" id="count-pill">0 products</span>
+        </div>
+      </div>
+      <div class="table-wrapper">
+        <div class="empty-state" id="empty-state">
+          <div class="e-icon"><i data-lucide="package"></i></div>
+          <p>No products yet. Use the form above to add your first item.</p>
+        </div>
+        <table id="inv-table" style="display:none;">
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Name</th>
+              <th>Category</th>
+              <th>Price</th>
+              <th>Qty</th>
+              <th>Stock Status</th>
+              <th class="center">Action</th>
+            </tr>
+          </thead>
+          <tbody id="inv-body"></tbody>
+        </table>
+      </div>
+    </div>
+
+  </div>
+  <script>
+    lucide.createIcons();
+  </script>
+</body>
+</html>

@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Student Result Processing System</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="./style.css">
+  <script src="./script.js" defer></script>
+</head>
+<body>
+  <div class="container">
+
+    <div class="header">
+      <h1>Student Result Processing</h1>
+      <p>Enter student names and scores to calculate grades and track performance.</p>
+    </div>
+
+    <!-- Stats -->
+    <div class="stats-row">
+      <div class="stat-card top-card">
+        <div class="s-label">Highest Score</div>
+        <div class="s-value" id="stat-top-score">—</div>
+        <div class="s-sub" id="stat-top-name">No entries yet</div>
+      </div>
+      <div class="stat-card">
+        <div class="s-label">Total Students</div>
+        <div class="s-value" id="stat-total">0</div>
+        <div class="s-sub">Recorded</div>
+      </div>
+      <div class="stat-card">
+        <div class="s-label">Pass Rate</div>
+        <div class="s-value" id="stat-pass-rate">—</div>
+        <div class="s-sub">Benchmark: 50+</div>
+      </div>
+    </div>
+
+    <!-- Form -->
+    <div class="form-card">
+      <h2>Add Student</h2>
+      <div class="form-row">
+        <div class="form-group">
+          <label for="inp-name">Student Name</label>
+          <input type="text" id="inp-name" placeholder="e.g. Chukwuemeka Eze" />
+        </div>
+        <div class="form-group">
+          <label for="inp-score">Score (0 – 100)</label>
+          <input type="number" id="inp-score" placeholder="e.g. 74" min="0" max="100" />
+        </div>
+        <button class="btn-add" id="btn-add">Add Student</button>
+      </div>
+      <div class="error-msg" id="error-msg"></div>
+    </div>
+
+    <!-- Table -->
+    <div class="table-card">
+      <div class="table-top">
+        <h2>Results</h2>
+        <div class="table-controls">
+          <span class="count-pill" id="count-pill">0 students</span>
+          <button class="btn-clear" id="btn-clear">Clear All</button>
+        </div>
+      </div>
+      <div class="table-wrapper">
+        <div class="empty-state" id="empty-state">
+          <p>No students added yet. Enter Student's names and grades above to get started.</p>
+        </div>
+        <table id="results-table" style="display:none;">
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Name</th>
+              <th>Score</th>
+              <th>Grade</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody id="results-body"></tbody>
+        </table>
+      </div>
+    </div>
+
+  </div>
+</body>
+</html>

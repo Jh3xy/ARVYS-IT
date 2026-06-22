@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ATM Simulation System</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="./style.css">
+  <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+<body>
+  <div class="container">
+
+    <div class="page-header">
+      <h1>ATM Simulation</h1>
+      <p>Simulate real ATM banking operations.</p>
+    </div>
+
+    <!-- ATM Machine -->
+    <div class="atm-card">
+
+      <!-- Header bar -->
+      <div class="atm-top">
+        <div class="atm-brand">
+          <div class="brand-icon"><i data-lucide="landmark"></i></div>
+          <div>
+            <div class="brand-name">SecureBank</div>
+            <div class="brand-sub">Self-Service Terminal</div>
+          </div>
+        </div>
+        <span class="session-dot" id="session-dot">● Active</span>
+      </div>
+
+      <div class="atm-body">
+
+        <!-- Main ATM UI -->
+        <div class="atm-main" id="atm-main">
+
+          <div class="balance-block">
+            <div class="bal-label">Available Balance</div>
+            <div class="bal-amount" id="bal-display">—</div>
+          </div>
+
+          <div class="status-box" id="status-box"></div>
+
+          <div class="actions-grid">
+            <button class="btn-act" onclick="doCheckBalance()">
+              <span class="ico"><i data-lucide="eye"></i></span> Check Balance
+            </button>
+            <button class="btn-act" id="btn-dep" onclick="selectAction('deposit')">
+              <span class="ico"><i data-lucide="arrow-up"></i></span> Deposit
+            </button>
+            <button class="btn-act" id="btn-wd" onclick="selectAction('withdraw')">
+              <span class="ico"><i data-lucide="arrow-down"></i></span> Withdraw
+            </button>
+            <button class="btn-act exit" onclick="doExit()">
+              <span class="ico"><i data-lucide="log-out"></i></span> Exit
+            </button>
+          </div>
+
+          <!-- Amount input (shown on deposit/withdraw) -->
+          <div class="amount-section" id="amount-section">
+            <div class="input-row">
+              <div class="input-wrap">
+                <span class="cur-prefix">₦</span>
+                <input
+                  class="amount-inp"
+                  type="number"
+                  id="amount-inp"
+                  placeholder="Enter amount"
+                  min="1"
+                />
+              </div>
+              <button class="btn-confirm" onclick="doConfirm()">Confirm</button>
+            </div>
+            <button class="btn-cancel" onclick="doCancel()">← Cancel</button>
+          </div>
+
+        </div>
+
+        <!-- Exit screen -->
+        <div class="exit-screen" id="exit-screen">
+          <div class="exit-ico"><i data-lucide="lock"></i></div>
+          <h3>Session Ended</h3>
+          <p>Thank you for using SecureBank ATM.<br/>Please collect your card.</p>
+          <button class="btn-new" onclick="doNewSession()">Start New Session</button>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- Transaction log -->
+    <div class="log-card">
+      <div class="log-head">
+        <h2>Transaction History</h2>
+        <button class="btn-clear-log" onclick="doClearLog()">Clear</button>
+      </div>
+      <div class="log-scroll" id="log-scroll"></div>
+    </div>
+
+  </div>
+   <script>
+    lucide.createIcons();
+  </script>
+  <script>
+    
+
+const BAL_KEY     = 'atm_balance_v1';
+const LOG_KEY     = 'atm_log_v1';
+const DEFAULT_BAL = 50000;
+
+let activeAction  = null; // 'deposit' | 'withdraw' | null
+
+/* ── Persistence ── */
+function getBalance() {
+  const v = localStorage.getItem(BAL_KEY);
+  return v !== null ? parseFloat(v) : DEFAULT_BAL;
+}
+function setBalance(v)  { localStorage.setItem(BAL_KEY, v.toString()); }
+function getLog()       {
+  try { return JSON.parse(localStorage.getItem(LOG_KEY)) || []; }
+  catch { return []; }
+}
+function saveLog(log)   { localStorage.setItem(LOG_KEY, JSON.stringify(log)); }
+
+/* ── Formatting ── */
+function fmt(n) {
+  return '₦' + Number(n).toLocaleString('en-NG', {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2
+  });
+}
+
+/* ── UI helpers ── */
+function setBalDisplay() {
+  document.getElementById('bal-display').textContent = fmt(getBalance());
+}
+
+function showStatus(msg, type) {
+  const el = document.getElementById('status-box');
+  el.textContent = msg;
+  el.className = `status-box show ${type}`;
+}
+function clearStatus() {
+  document.getElementById('status-box').className = 'status-box';
+}
+
+function setActiveBtn(id) {
+  ['btn-dep','btn-wd'].forEach(b =>
+    document.getElementById(b).classList.toggle('active', b === id)
+  );
+}
+
+/* ── Operations ── */
+function doCheckBalance() {
+  doCancel();
+  showStatus(`Your current balance is ${fmt(getBalance())}.`, 'info');
+  pushLog({ type: 'check', desc: 'Balance Enquiry', balance: getBalance() });
+}
+
+function selectAction(action) {
+  activeAction = action;
+  clearStatus();
+  setActiveBtn(action === 'deposit' ? 'btn-dep' : 'btn-wd');
+  document.getElementById('amount-section').classList.add('show');
+  const inp = document.getElementById('amount-inp');
+  inp.value = '';
+  inp.placeholder = action === 'deposit' ? 'Enter deposit amount' : 'Enter withdrawal amount';
+  inp.focus();
+}
+
+function doConfirm() {
+  const inp    = document.getElementById('amount-inp');
+  const amount = parseFloat(inp.value);
+
+  if (isNaN(amount) || amount <= 0) {
+    showStatus('Enter a valid amount greater than ₦0.', 'error');
+    return;
+  }
+
+  const bal = getBalance();
+
+  if (activeAction === 'deposit') {
+    const newBal = bal + amount;
+    setBalance(newBal);
+    setBalDisplay();
+    showStatus(`Deposited ${fmt(amount)} successfully. New balance: ${fmt(newBal)}.`, 'success');
+    pushLog({ type: 'deposit', desc: 'Deposit', amount, balance: newBal });
+    doCancel();
+
+  } else if (activeAction === 'withdraw') {
+    if (amount > bal) {
+      showStatus(`Insufficient funds. Available balance: ${fmt(bal)}.`, 'error');
+      return;
+    }
+    const newBal = bal - amount;
+    setBalance(newBal);
+    setBalDisplay();
+    showStatus(`Withdrew ${fmt(amount)} successfully. New balance: ${fmt(newBal)}.`, 'success');
+    pushLog({ type: 'withdraw', desc: 'Withdrawal', amount, balance: newBal });
+    doCancel();
+  }
+}
+
+function doCancel() {
+  activeAction = null;
+  document.getElementById('amount-section').classList.remove('show');
+  document.getElementById('amount-inp').value = '';
+  setActiveBtn(null);
+  clearStatus();
+}
+
+function doExit() {
+  doCancel();
+  clearStatus();
+  document.getElementById('atm-main').classList.add('hidden');
+  document.getElementById('exit-screen').classList.add('show');
+  const dot = document.getElementById('session-dot');
+  dot.textContent = '○ Ended';
+  dot.classList.add('off');
+  pushLog({ type: 'session', desc: 'Session Ended', balance: getBalance() });
+}
+
+function doNewSession() {
+  document.getElementById('exit-screen').classList.remove('show');
+  document.getElementById('atm-main').classList.remove('hidden');
+  const dot = document.getElementById('session-dot');
+  dot.textContent = '● Active';
+  dot.classList.remove('off');
+  setBalDisplay();
+  pushLog({ type: 'session', desc: 'Session Started', balance: getBalance() });
+}
+
+/* ── Log ── */
+function pushLog(entry) {
+  const log = getLog();
+  log.unshift({ ...entry, ts: Date.now() });
+  if (log.length > 10) log.pop();
+  saveLog(log);
+  renderLog();
+}
+
+function renderLog() {
+  const log      = getLog();
+  const scroll   = document.getElementById('log-scroll');
+  scroll.innerHTML = '';
+
+  if (log.length === 0) {
+    scroll.innerHTML = '<div class="log-empty">No transactions yet.</div>';
+    return;
+  }
+
+  log.forEach(e => {
+    const hasAmt   = e.amount !== undefined;
+    const isDeposit = e.type === 'deposit';
+
+    const amtHtml = hasAmt
+      ? `<span class="log-amt ${e.type}">${isDeposit ? '+' : '−'}${fmt(e.amount)}</span>`
+      : `<span class="log-amt neutral">—</span>`;
+
+    const item = document.createElement('div');
+    item.className = 'log-item';
+    item.innerHTML = `
+      <div class="log-left">
+        <div class="log-pip ${e.type}"></div>
+        <div>
+          <div class="log-desc">${e.desc}</div>
+          <div class="log-bal">Balance: ${fmt(e.balance)}</div>
+        </div>
+      </div>
+      ${amtHtml}
+    `;
+    scroll.appendChild(item);
+  });
+}
+
+function doClearLog() {
+  if (getLog().length === 0) return;
+  if (!confirm('Clear all transaction history?')) return;
+  saveLog([]);
+  renderLog();
+}
+
+/* ── Keyboard ── */
+document.getElementById('amount-inp').addEventListener('keydown', e => {
+  if (e.key === 'Enter')  doConfirm();
+  if (e.key === 'Escape') doCancel();
+});
+
+/* ── Init ── */
+setBalDisplay();
+renderLog();
+
+  </script>
+</body>
+</html>
