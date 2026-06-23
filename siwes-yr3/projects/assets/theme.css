@@ -1,0 +1,27 @@
+
+/* General color theme for each project */
+
+
+:root {
+  --bg: #f0f1f3;
+  --surface: #ffffff;
+  --border: #e2e4e9;
+  --text-primary: #0d0f14;
+  --text-secondary: #6b7280;
+  --accent: #6366f1;
+  --accent-hover: #4f46e5;
+  --accent-light: #eef2ff;
+  --success-bg: #f0fdf4;
+  --success-text: #16a34a;
+  --success-border: #bbf7d0;
+  --warn-bg: #fffbeb;
+  --warn-text: #d97706;
+  --warn-border: #fde68a;
+  --fail-bg: #fff1f2;
+  --fail-text: #dc2626;
+  --fail-border: #fecdd3;
+  --radius: 10px;
+  --shadow: 0 1px 3px rgba(0,0,0,0.06), 0 4px 16px rgba(0,0,0,0.04);
+}
+
+

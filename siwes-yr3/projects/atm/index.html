@@ -97,7 +97,9 @@
         <h2>Transaction History</h2>
         <button class="btn-clear-log" onclick="doClearLog()">Clear</button>
       </div>
-      <div class="log-scroll" id="log-scroll"></div>
+      <div class="log-scroll" id="log-scroll">
+        <!-- Transaction history added dynamically via JS -->
+      </div>
     </div>
 
   </div>
@@ -118,11 +120,17 @@ function getBalance() {
   const v = localStorage.getItem(BAL_KEY);
   return v !== null ? parseFloat(v) : DEFAULT_BAL;
 }
-function setBalance(v)  { localStorage.setItem(BAL_KEY, v.toString()); }
-function getLog()       {
+
+// Save balance to LocalStorage
+function setBalance(v) { localStorage.setItem(BAL_KEY, v.toString()); }
+
+// Get Transaction logs
+function getLog() {
   try { return JSON.parse(localStorage.getItem(LOG_KEY)) || []; }
   catch { return []; }
 }
+
+// Save transaction
 function saveLog(log)   { localStorage.setItem(LOG_KEY, JSON.stringify(log)); }
 
 /* ── Formatting ── */
@@ -172,21 +180,25 @@ function selectAction(action) {
 }
 
 function doConfirm() {
-  const inp    = document.getElementById('amount-inp');
+  const inp = document.getElementById('amount-inp');
   const amount = parseFloat(inp.value);
 
   if (isNaN(amount) || amount <= 0) {
-    showStatus('Enter a valid amount greater than ₦0.', 'error');
+    showStatus('Enter a valid amount greater than 0.', 'error');
     return;
   }
 
   const bal = getBalance();
 
   if (activeAction === 'deposit') {
+    // Add and set new balance
     const newBal = bal + amount;
     setBalance(newBal);
     setBalDisplay();
+
     showStatus(`Deposited ${fmt(amount)} successfully. New balance: ${fmt(newBal)}.`, 'success');
+
+    // Add log to transaction history and remove deposit input
     pushLog({ type: 'deposit', desc: 'Deposit', amount, balance: newBal });
     doCancel();
 
@@ -195,6 +207,7 @@ function doConfirm() {
       showStatus(`Insufficient funds. Available balance: ${fmt(bal)}.`, 'error');
       return;
     }
+    // update balance after withdrawal
     const newBal = bal - amount;
     setBalance(newBal);
     setBalDisplay();
@@ -205,6 +218,7 @@ function doConfirm() {
 }
 
 function doCancel() {
+  // Reset error states and action flag
   activeAction = null;
   document.getElementById('amount-section').classList.remove('show');
   document.getElementById('amount-inp').value = '';
@@ -233,18 +247,20 @@ function doNewSession() {
   pushLog({ type: 'session', desc: 'Session Started', balance: getBalance() });
 }
 
-/* ── Log ── */
+/* ── Record Transaction Log ── */
 function pushLog(entry) {
+  // Extract logs from storage
   const log = getLog();
+  // Add new entry to the top of the array and re render log
   log.unshift({ ...entry, ts: Date.now() });
-  if (log.length > 10) log.pop();
+  if (log.length > 10) log.pop(); //Remove last entry if greater than 10 
   saveLog(log);
   renderLog();
 }
 
 function renderLog() {
-  const log      = getLog();
-  const scroll   = document.getElementById('log-scroll');
+  const log  = getLog();
+  const scroll = document.getElementById('log-scroll');
   scroll.innerHTML = '';
 
   if (log.length === 0) {
@@ -253,7 +269,7 @@ function renderLog() {
   }
 
   log.forEach(e => {
-    const hasAmt   = e.amount !== undefined;
+    const hasAmt  = e.amount !== undefined;
     const isDeposit = e.type === 'deposit';
 
     const amtHtml = hasAmt

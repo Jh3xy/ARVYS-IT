@@ -1,4 +1,6 @@
 const STORAGE_KEY = "srps_v1";
+const THEME_KEY = "srps_theme";
+const nameEl = document.getElementById("inp-name");
 
 /* ── Grading logic ── */
 function getGrade(score) {
@@ -67,7 +69,7 @@ function render() {
   if (total === 0) {
     document.getElementById("stat-top-score").textContent = "—";
     document.getElementById("stat-top-name").textContent = "No entries yet";
-    document.getElementById("stat-pass-rate").textContent = "—";
+    // document.getElementById("stat-pass-rate").textContent = "—";
     return;
   }
 
@@ -76,13 +78,12 @@ function render() {
 
   document.getElementById("stat-top-score").textContent = top.score;
   document.getElementById("stat-top-name").textContent = top.name;
-  document.getElementById("stat-pass-rate").textContent =
-    `${Math.round((passed / total) * 100)}%`;
+  // document.getElementById("stat-pass-rate").textContent =
+  //   `${Math.round((passed / total) * 100)}%`;
 }
 
 /* ── Add student ── */
 function addStudent() {
-  const nameEl = document.getElementById("inp-name");
   const scoreEl = document.getElementById("inp-score");
   const errEl = document.getElementById("error-msg");
 
@@ -93,15 +94,12 @@ function addStudent() {
   if (/[^a-zA-Z\s]/.test(name)) {
     errEl.textContent = "Name can only contain letters and spaces.";
     errEl.classList.add("show");
+    nameEl.classList.add("error-inp");
+    // Add extra visual weight
     return;
   }
-  
-  if (
-    !name ||
-    isNaN(score) ||
-    score < 0 ||
-    score > 100
-  ) {
+
+  if (!name || isNaN(score) || score < 0 || score > 100) {
     errEl.textContent =
       "Please enter a valid name and a score between 0 and 100.";
     errEl.classList.add("show");
@@ -109,6 +107,7 @@ function addStudent() {
   }
 
   errEl.classList.remove("show");
+  nameEl.classList.remove("error-inp");
 
   const students = load();
   students.push({ name, score: Math.round(score) });
@@ -147,6 +146,41 @@ document.getElementById("inp-score").addEventListener("keydown", (e) => {
 document.getElementById("inp-name").addEventListener("keydown", (e) => {
   if (e.key === "Enter") document.getElementById("inp-score").focus();
 });
+document.getElementById("inp-name").addEventListener("input", () => {
+  nameEl.classList.remove("error-inp");
+  console.log("type input fired");
+});
+
+function initTheme() {
+  const saved = localStorage.getItem(THEME_KEY);
+  const isDark = saved ? saved === "dark" : false;
+  applyTheme(isDark);
+}
+
+function applyTheme(isDark) {
+  if (isDark) {
+    document.body.classList.add("dark-theme");
+    localStorage.setItem(THEME_KEY, "dark");
+  } else {
+    document.body.classList.remove("dark-theme");
+    localStorage.setItem(THEME_KEY, "light");
+  }
+  updateThemeIcon();
+}
+
+function updateThemeIcon() {
+  const btn = document.getElementById("theme-toggle");
+  const icon = btn.querySelector("[data-lucide]");
+  const isDark = document.body.classList.contains("dark-theme");
+  icon.setAttribute("data-lucide", isDark ? "sun" : "moon");
+  lucide.createIcons();
+}
+
+document.getElementById("theme-toggle").addEventListener("click", () => {
+  const isDark = document.body.classList.contains("dark-theme");
+  applyTheme(!isDark);
+});
 
 /* ── Init ── */
+initTheme();
 render();

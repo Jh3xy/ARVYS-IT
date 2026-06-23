@@ -5,27 +5,33 @@ const STORE_KEY = 'inv_v1';
 
 /* ── Events ── */
 const addBtn = document.getElementById('btn-add');
+const nameInput = document.getElementById("inp-name")
+const priceInput = document.getElementById("inp-price")
+const qtyInput = document.getElementById("inp-qty")
+const searchInput = document.getElementById("search-inp");
+const invBody = document.getElementById('inv-body')
+
+
 addBtn.addEventListener('click', addProduct);
+nameInput.addEventListener("keydown", (e) => {
+  if (e.key === "Enter") priceInput.focus();
+});
+priceInput.addEventListener("keydown", (e) => {
+  if (e.key === "Enter") qtyInput.focus();
+});
+qtyInput.addEventListener("keydown", (e) => {
+  if (e.key === "Enter") addProduct();
+});
 
-document.getElementById('inp-name').addEventListener('keydown', e => {
-  if (e.key === 'Enter') document.getElementById('inp-price').focus();
-});
-document.getElementById('inp-price').addEventListener('keydown', e => {
-  if (e.key === 'Enter') document.getElementById('inp-qty').focus();
-});
-document.getElementById('inp-qty').addEventListener('keydown', e => {
-  if (e.key === 'Enter') addProduct();
-});
-
-document.getElementById('search-inp').addEventListener('input', e => {
+searchInput.addEventListener("input", (e) => {
   render(e.target.value);
 });
 
 // event delegation — one listener handles all delete buttons
-document.getElementById('inv-body').addEventListener('click', e => {
-  const btn = e.target.closest('.btn-del');
+invBody.addEventListener("click", (e) => {
+  const btn = e.target.closest(".btn-del");
   if (!btn) return;
-  if (confirm('Remove this product?')) deleteProduct(Number(btn.dataset.id));
+  if (confirm("Remove this product?")) deleteProduct(Number(btn.dataset.id));
 });
 
 /* ── Storage ── */
