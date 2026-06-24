@@ -1,3 +1,5 @@
+
+
 const STORAGE_KEY = "srps_v1";
 const THEME_KEY = "srps_theme";
 const nameEl = document.getElementById("inp-name");
