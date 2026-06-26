@@ -1,5 +1,7 @@
 
 
+import { setupPdfExport } from "../assets/js/export.js";
+
 const STORAGE_KEY = "srps_v1";
 const THEME_KEY = "srps_theme";
 const nameEl = document.getElementById("inp-name");
@@ -151,6 +153,44 @@ document.getElementById("inp-name").addEventListener("keydown", (e) => {
 document.getElementById("inp-name").addEventListener("input", () => {
   nameEl.classList.remove("error-inp");
   console.log("type input fired");
+});
+
+setupPdfExport({
+  trigger: "#btn-export",
+  modalTitle: "Export student results",
+  modalDescription: "Download the added student results as a PDF report.",
+  title: "Student Result Processing",
+  fileName: "student-results.pdf",
+  emptyMessage: "No student records to export. Add at least one student first.",
+  columns: ["#", "Name", "Score", "Grade", "Status"],
+  getRows: () =>
+    load().map((student, index) => [
+      index + 1,
+      student.name,
+      student.score,
+      getGrade(student.score),
+      isPassing(student.score) ? "Pass" : "Fail",
+    ]),
+  summary: () => {
+    const students = load();
+    const total = students.length;
+    const passed = students.filter((student) =>
+      isPassing(student.score),
+    ).length;
+    const failed = total - passed;
+    const top = students.reduce(
+      (best, student) => (student.score > best.score ? student : best),
+      { name: "None", score: 0 },
+    );
+
+    return [
+      ["Total Students", String(total)],
+      ["Highest Score", total ? `${top.name} - ${top.score}` : "None"],
+      ["Passed", String(passed)],
+      ["Failed", String(failed)],
+      ["Pass Benchmark", "Score 50+"],
+    ];
+  },
 });
 
 function initTheme() {

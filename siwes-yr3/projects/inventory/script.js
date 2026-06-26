@@ -1,6 +1,9 @@
 
 
+import { setupPdfExport } from "../assets/js/export.js";
+
 const STORE_KEY = 'inv_v1';
+let THEME_KEY = 'theme_v1';
 
 
 /* ── Events ── */
@@ -176,5 +179,71 @@ function deleteProduct(id) {
   render(document.getElementById('search-inp').value);
 }
 
+function initTheme() {
+  const saved = localStorage.getItem(THEME_KEY);
+  const isDark = saved ? saved === "dark" : false;
+  applyTheme(isDark);
+}
+
+function applyTheme(isDark) {
+  if (isDark) {
+    document.body.classList.add("dark-theme");
+    localStorage.setItem(THEME_KEY, "dark");
+  } else {
+    document.body.classList.remove("dark-theme");
+    localStorage.setItem(THEME_KEY, "light");
+  }
+  updateThemeIcon();
+}
+
+function updateThemeIcon() {
+  const btn = document.getElementById("theme-toggle");
+  const icon = btn.querySelector("[data-lucide]");
+  const isDark = document.body.classList.contains("dark-theme");
+  icon.setAttribute("data-lucide", isDark ? "sun" : "moon");
+  lucide.createIcons();
+}
+
+document.getElementById("theme-toggle").addEventListener("click", () => {
+  const isDark = document.body.classList.contains("dark-theme");
+  applyTheme(!isDark);
+});
+
+setupPdfExport({
+  trigger: "#btn-export",
+  modalTitle: "Export inventory report",
+  modalDescription: "Download the current inventory records as a PDF report.",
+  title: "Inventory Management Report",
+  fileName: "inventory-report.pdf",
+  emptyMessage: "No products to export. Add at least one product first.",
+  orientation: "landscape",
+  columns: ["#", "Name", "Category", "Price", "Qty", "Stock Status"],
+  getRows: () =>
+    load().map((product, index) => [
+      index + 1,
+      product.name,
+      product.category,
+      fmt(product.price),
+      product.qty,
+      stockLabel(product.qty),
+    ]),
+  summary: () => {
+    const products = load();
+    const totalProducts = products.length;
+    const totalItems = products.reduce((sum, product) => sum + product.qty, 0);
+    const totalValue = products.reduce(
+      (sum, product) => sum + product.price * product.qty,
+      0,
+    );
+
+    return [
+      ["Total Products", String(totalProducts)],
+      ["Total Items", String(totalItems)],
+      ["Total Value", fmt(totalValue)],
+    ];
+  },
+});
+
 /* ── Init ── */
+initTheme();
 render();

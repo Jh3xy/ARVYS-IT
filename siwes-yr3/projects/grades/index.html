@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Student Result Processing System</title>
+    <title>Result Processing System</title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
@@ -11,7 +11,10 @@
       rel="stylesheet"
     />
     <link rel="stylesheet" href="./style.css" />
-    <script src="./script.js" defer></script>
+    <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/jspdf-autotable@3.8.2/dist/jspdf.plugin.autotable.min.js"></script>
+    <script type="module" src="../assets/js/export.js" defer></script>
+    <script type="module" src="./script.js" defer></script>
     <script src="https://unpkg.com/lucide@latest"></script>
   </head>
   <body>
@@ -24,9 +27,15 @@
             performance.
           </p>
         </div>
-        <button class="theme-btn" id="theme-toggle" title="Toggle dark mode">
-          <i data-lucide="moon"></i>
-        </button>
+        <div class="cta-wrap">
+          <button class="cta" id="btn-export" title="Export Results">
+            Export
+            <i data-lucide="upload"></i>
+          </button>
+          <button class="cta theme-btn" id="theme-toggle" title="Toggle dark mode">
+            <i data-lucide="moon"></i>
+          </button>
+        </div>
       </div>
 
       <!-- Stats -->
@@ -54,7 +63,7 @@
 
       <!-- Form -->
       <div class="form-card">
-        <h2>Add Student</h2>
+        <h2>Add Student Result</h2>
         <div class="form-row">
           <div class="form-group">
             <label for="inp-name">Student Name</label>
